@@ -189,12 +189,12 @@ def sign_up_control(email,password):
     password_control(password)
     email_sender(email,key)
 
-def email_control(mail):
-    if mail == None:
+def email_control(email):
+    if email == None:
         raise HTTPException(status_code=400, detail="Email Area Empty")
-    elif redis.get(user.email) == None:
+    elif email == None:
         raise HTTPException(status_code=400, detail="Email is already exist")
-    elif redis.get(user.email).find("@") == -1 or redis.get(user.email).find(".") == -1:
+    elif email.find("@") == -1 or email.find(".") == -1:
         raise HTTPException(status_code=400, detail="Invalid Email")
     elif not validate_email(email) :
         raise HTTPException(status_code=400, detail="Invalid Email")
@@ -225,4 +225,5 @@ def email_sender(email,key):
     return "Email Sent"
 
 def random_key_generator():
-    return ''.join(random.choice(string.ascii_letters) for i in range(10))
+#    return ''.join(random.choice(string.ascii_letters) for i in range(10))
+    return "1234567890"
