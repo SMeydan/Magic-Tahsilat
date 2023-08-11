@@ -5,6 +5,7 @@ from typing import List
 from email_validator import validate_email, EmailNotValidError
 import re
 
+import random2
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import sessionmaker
@@ -141,8 +142,6 @@ from Models.Variables import VariablesBase
 app = FastAPI()
 
 
-
-
 redis = get_redis_connection(
     host = "redis-10788.c282.east-us-mz.azure.cloud.redislabs.com",
     port = 10788,
@@ -150,41 +149,29 @@ redis = get_redis_connection(
     decode_responses = True
 )
 
-#@app.on_event("startup")
-#async def startup():
-#    app.pool = await asyncpg.create_pool(user='postgres', password='1234',
-#                                         database='postgres', host='127.0.0.1')
-    
-#@app.on_event("shutdown")
-#async def shutdown():
-#    await app.pool.close()
+@app.on_event("startup")
+async def startup():
+   app.pool = await asyncpg.create_pool(user='postgres', password='1234',
+                                        database='postgres', host='172.31.55.2')
+
+@app.on_event("shutdown")
+async def shutdown():
+    await app.pool.close()
 
 @app.get("/")
 def default():
-    message = Mail(
-    from_email='magictahsilat@gmail.com',
-    to_emails='tachsinachmet@gmail.com',
-    subject='voila! It works!',
-    html_content='<strong>I LOVE U, BABE <3</strong>')
-    try:
-        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-        response = sg.send(message)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
-
-    except Exception as e:
-        print(e)
+    return {"Welcome":"Our Page"}
 
 
 @app.post("/sign_up",tags=["users"])
 def create_new_user(user: UserSchema = Body(...) ): 
-    #get user from form
-    sign_up_control(redis.get(user.email),redis.get(user.password))
+    sign_up_control(user.email,user.password)
+    
     return {"Koçum":"Olacak Bu İş"}
 
 def sign_up_control(email,password):
     key = random_key_generator()
+    store_verification_code(email, key)
     email_control(email)
     password_control(password)
     email_sender(email,key)
@@ -194,7 +181,7 @@ def email_control(email):
         raise HTTPException(status_code=400, detail="Email Area Empty")
     elif email == None:
         raise HTTPException(status_code=400, detail="Email is already exist")
-    elif email.find("@") == -1 or email.find(".") == -1:
+    elif "@" not in email or "." not in email:
         raise HTTPException(status_code=400, detail="Invalid Email")
     elif not validate_email(email) :
         raise HTTPException(status_code=400, detail="Invalid Email")
@@ -212,7 +199,7 @@ def email_sender(email,key):
     from_email='magictahsilat@gmail.com',
     to_emails=email,
     subject='MagicTahsilat Email Validation',
-    html_content='<strong>I LOVE U, BABE <3</strong>'+key)
+    html_content='Hello,\n Your Validation Key is'+key)
     try:
         sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
         response = sg.send(message)
@@ -225,5 +212,11 @@ def email_sender(email,key):
     return "Email Sent"
 
 def random_key_generator():
-#    return ''.join(random.choice(string.ascii_letters) for i in range(10))
-    return "1234567890"
+    return str(random2.randint(100_000, 999_999))
+
+def store_verification_code(email, code):
+    """Store the verification code in Redis."""
+    try:
+        redis.setex(email + ":verification_code", 600, code)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to store verification code.")

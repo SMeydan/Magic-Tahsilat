@@ -9,7 +9,7 @@ app = FastAPI()
 @app.on_event("startup")
 async def startup():
     app.pool = await asyncpg.create_pool(user='postgres', password='1234',
-                                         database='postgres1', host='127.0.0.1')
+                                        database='postgres', host='172.31.55.2', port=5432)
     async with app.pool.acquire() as connection:
         await connection.execute('''
             CREATE TABLE IF NOT EXISTS COUNTRIES(
