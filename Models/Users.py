@@ -1,9 +1,8 @@
 from pydantic import BaseModel
-from datetime import date
-from sqlalchemy import create_engine, Column, Integer, String, Float, Date, Boolean
+from sqlalchemy import Column, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+from database import Base
 
 class UsersBase(BaseModel):
     id: str
@@ -27,10 +26,10 @@ class UsersBase(BaseModel):
     is_active: bool
 
 
-
 class Users(Base):
     __tablename__ = "users"
-    id = Column(String,primary_key = True) 
+
+    id = Column(String, primary_key=True)
     name = Column(String)
     surname = Column(String)
     identity_number = Column(String)

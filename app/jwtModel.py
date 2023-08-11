@@ -1,8 +1,7 @@
 from datetime import date
-from typing import Optional
-from uuid import UUID, uuid4
 import uuid
-from pydantic import BaseModel,Field,EmailStr
+from pydantic import BaseModel, Field, EmailStr
+
 
 class UserSchema (BaseModel):
     user_id: uuid.UUID = Field(default_factory=uuid.uuid4)
@@ -13,6 +12,7 @@ class UserSchema (BaseModel):
     country: str = Field(...)
     user_created_time: date = Field(...)
     is_active: bool = Field(...)
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -27,9 +27,11 @@ class UserSchema (BaseModel):
             }
         }
 
+
 class UserLoginSchema (BaseModel):
     email: EmailStr = Field(...)
     password: str = Field(...)
+
     class Config:
         json_schema_extra = {
             "example": {

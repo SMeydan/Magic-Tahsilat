@@ -1,9 +1,7 @@
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, Float, Date
-from sqlalchemy.ext.declarative import declarative_base
-from datetime import date
+from database import Base
 
-Base = declarative_base()
 
 class CitiesBase(BaseModel):
     id: str

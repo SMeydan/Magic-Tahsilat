@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, Float, Date
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import date
 
-Base = declarative_base()
+from database import Base
+
 
 class AccountTransactionsBase(BaseModel):
     id: str
@@ -19,7 +19,8 @@ class AccountTransactionsBase(BaseModel):
     usd_debt: float
     usd_receivable: float
     usd_balance: float
-    
+
+
 class AccountTransactions(Base):
     __tablename__ = "account_transactions"
 
