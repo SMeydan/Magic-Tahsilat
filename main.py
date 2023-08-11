@@ -35,12 +35,12 @@ def get_db():
         db.close()
 
 
-#redis = get_redis_connection(
-#    host="redis-10788.c282.east-us-mz.azure.cloud.redislabs.com",
-#    port=10788,
-#    password="yKCjtyQum735j4UL1FeO914Ci9etLHwf",
-#    decode_responses=True
-#)
+redis = get_redis_connection(
+    host="redis-10788.c282.east-us-mz.azure.cloud.redislabs.com",
+    port=10788,
+    password="yKCjtyQum735j4UL1FeO914Ci9etLHwf",
+    decode_responses=True
+)
 
 
 # @app.on_event("startup")
