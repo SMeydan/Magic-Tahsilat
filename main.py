@@ -7,6 +7,7 @@ import re
 from fastapi import Depends
 import json
 import random2
+import bcrypt
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import sessionmaker,Session
@@ -14,12 +15,13 @@ from redis_om import get_redis_connection
 
 from app.jwtModel import UserSchema, UserLoginSchema
 from app.auth.jwtBearer import JWTBearer
-from app.auth.jwtHandler import decode_jwt_token
+from app.auth.jwtHandler import decode_jwt_token,create_jwt_token
 
 import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
+from decouple import config
 import models
 from database import SessionLocal, engine
 
@@ -53,9 +55,10 @@ def login(user: UserLoginSchema, db: Session = Depends(get_db)):
     db_user = db.query(models.Users).filter(models.Users.email == user.email).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    if db_user.password != user.password:
+    if not check_password(user.password, db_user.password):
         raise HTTPException(status_code=400, detail="Incorrect password")
-    return {"message": "Login successful"}
+    token = create_jwt_token(db_user.user_id)
+    return {"message": "Login successful", "token": token['access_token']}
 
 @app.post("/verify",tags=["users"])
 def verify(email: str, key: str, db: Session = Depends(get_db)):
@@ -71,7 +74,7 @@ def verify(email: str, key: str, db: Session = Depends(get_db)):
         try:
             # Deserialize stored user data
             temp_user_data = json.loads(temp_user_data_json)
-            # Insert user into the main database
+            temp_user_data["password"] = hash_password(temp_user_data["password"])
             new_user = models.Users(**temp_user_data)
             db.add(new_user)
             db.commit()
@@ -154,3 +157,15 @@ def store_verification_code(email, code):
         redis.setex(email + ":verification_code", 600, code)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to store verification code.")
+
+def hash_password(password: str) -> str:
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
+
+def check_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+
+@app.post("/members",tags=["members"])
+def get_all_members():
+    return True
