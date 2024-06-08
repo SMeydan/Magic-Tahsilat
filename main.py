@@ -143,9 +143,9 @@ app = FastAPI()
 
 
 redis = get_redis_connection(
-    host = "redis-10788.c282.east-us-mz.azure.cloud.redislabs.com",
+    host = "redis-aa",
     port = 10788,
-    password = "yKCjtyQum735j4UL1FeO914Ci9etLHwf",
+    password = "aaa",
     decode_responses = True
 )
 
