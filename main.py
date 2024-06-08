@@ -40,9 +40,9 @@ def get_db():
 app = FastAPI()
 
 redis = get_redis_connection(
-    host = "redis-10788.c282.east-us-mz.azure.cloud.redislabs.com",
+    host = "redis-example-db",
     port = 10788,
-    password = "yKCjtyQum735j4UL1FeO914Ci9etLHwf",
+    password = "password",
     decode_responses = True
 )
 
